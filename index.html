@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MedSAM Studio | Prompt-Based Medical Image Segmentation</title>
+  <meta name="description" content="State-of-the-art interactive prompt-based medical image segmentation platform powered by the Segment Anything Model (MedSAM) for CT, MRI, Fundus, and Histology.">
+  
+  <!-- Modern Typography: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons for Medical & Scientific UI -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <link rel="stylesheet" href="index.css">
+</head>
+<body class="theme-dark">
+  <!-- Cyber-Medical Ambient Glow -->
+  <div class="ambient-glow glow-cyan"></div>
+  <div class="ambient-glow glow-blue"></div>
+
+  <!-- App Header -->
+  <header class="app-header" id="appHeader">
+    <div class="header-brand">
+      <div class="brand-logo-wrap">
+        <i class="fa-solid fa-dna brand-icon"></i>
+        <span class="brand-pulse"></span>
+      </div>
+      <div class="brand-text">
+        <div class="brand-title-row">
+          <h1 class="brand-title">MedSAM <span class="highlight">Studio</span></h1>
+          <span class="badge badge-ai"><i class="fa-solid fa-microchip"></i> ViT-H Foundation</span>
+        </div>
+        <p class="brand-subtitle">Prompt-Based Medical Image Segmentation System (Segment Anything in Medical Images)</p>
+      </div>
+    </div>
+
+    <div class="header-status">
+      <div class="status-pill status-ready" id="modelStatusPill">
+        <span class="status-dot"></span>
+        <span class="status-label" id="modelStatusText">MedSAM Vision Transformer: Ready</span>
+      </div>
+      <div class="telemetry-item">
+        <span class="telemetry-label">Decoder Latency</span>
+        <span class="telemetry-value" id="headerLatency">~8.4 ms</span>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn btn-ghost" id="btnAudioToggle" title="Toggle Clinical Audio SFX" aria-label="Toggle Audio">
+        <i class="fa-solid fa-volume-high" id="audioIcon"></i>
+      </button>
+      <button class="btn btn-outline" id="btnUserManual" title="Interactive User Manual &amp; Project Guide">
+        <i class="fa-solid fa-book-medical"></i> User Manual
+      </button>
+      <button class="btn btn-outline" id="btnArchitectureModal" title="MedSAM Architecture &amp; Workflow">
+        <i class="fa-solid fa-network-wired"></i> Architecture
+      </button>
+      <button class="btn btn-primary" id="btnGenerateReport">
+        <i class="fa-solid fa-file-medical"></i> Clinical Report
+      </button>
+      <a href="MedSAM_Project_Report.pdf" download="MedSAM_Project_Report.pdf" class="btn btn-secondary" id="btnDownloadPDF" title="Direct Download Pre-Generated Project Report (PDF)" style="text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(5, 150, 105, 0.45)); border: 1px solid rgba(16, 185, 129, 0.6); color: #6ee7b7;">
+        <i class="fa-solid fa-file-arrow-down"></i> Download PDF
+      </a>
+      <a href="project_report.html" target="_blank" class="btn btn-secondary" id="btnProjectReport" title="View Full Academic Project Report (Interactive / Print View)" style="text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; background: linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(220, 38, 38, 0.45)); border: 1px solid rgba(239, 68, 68, 0.6); color: #fca5a5;">
+        <i class="fa-solid fa-file-pdf"></i> View Report
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Workstation Layout -->
+  <main class="workstation-container" id="workstation">
+    
+    <!-- Left Panel: Dataset, Scans, Windowing & LUTs -->
+    <aside class="panel panel-left" id="panelLeft">
+      
+      <!-- Modality / Scan Library -->
+      <section class="panel-section">
+        <div class="section-header">
+          <h2><i class="fa-solid fa-images"></i> Medical Scans</h2>
+          <span class="badge badge-dim" id="scanCountBadge">4 Curated</span>
+        </div>
+        
+        <div class="scan-selector-grid" id="scanSelectorGrid">
+          <!-- Brain MRI -->
+          <button class="scan-card active" data-scan-id="brain_mri" id="cardBrainMri">
+            <div class="scan-card-thumb">
+              <img src="assets/images/brain_mri.jpg" alt="Axial Brain MRI Thumbnail">
+              <span class="scan-tag tag-mri">MRI T1c</span>
+            </div>
+            <div class="scan-card-info">
+              <div class="scan-card-title">Brain MRI (Axial)</div>
+              <div class="scan-card-desc">Glioblastoma Lesion</div>
+              <div class="scan-card-meta"><i class="fa-regular fa-clock"></i> 512x512 • 1.0mm</div>
+            </div>
+          </button>
+
+          <!-- Chest CT -->
+          <button class="scan-card" data-scan-id="chest_ct" id="cardChestCt">
+            <div class="scan-card-thumb">
+              <img src="assets/images/chest_ct.jpg" alt="Chest CT Scan Thumbnail">
+              <span class="scan-tag tag-ct">CT Axial</span>
+            </div>
+            <div class="scan-card-info">
+              <div class="scan-card-title">Chest CT (Lung Window)</div>
+              <div class="scan-card-desc">Solitary Pulmonary Nodule</div>
+              <div class="scan-card-meta"><i class="fa-regular fa-clock"></i> 512x512 • 0.7mm</div>
+            </div>
+          </button>
+
+          <!-- Retinal Fundus -->
+          <button class="scan-card" data-scan-id="retinal_fundus" id="cardRetinal">
+            <div class="scan-card-thumb">
+              <img src="assets/images/retinal_fundus.jpg" alt="Retinal Fundus Thumbnail">
+              <span class="scan-tag tag-fundus">Fundus</span>
+            </div>
+            <div class="scan-card-info">
+              <div class="scan-card-title">Retinal Fundus</div>
+              <div class="scan-card-desc">Optic Cup &amp; Disc (CDR)</div>
+              <div class="scan-card-meta"><i class="fa-regular fa-clock"></i> Color • 45° FOV</div>
+            </div>
+          </button>
+
+          <!-- Histology -->
+          <button class="scan-card" data-scan-id="histology" id="cardHistology">
+            <div class="scan-card-thumb">
+              <img src="assets/images/histology.jpg" alt="Histology Biopsy Thumbnail">
+              <span class="scan-tag tag-pathology">H&amp;E Path</span>
+            </div>
+            <div class="scan-card-info">
+              <div class="scan-card-title">Histopathology Slide</div>
+              <div class="scan-card-desc">Ductal Carcinoma Nuclei</div>
+              <div class="scan-card-meta"><i class="fa-regular fa-clock"></i> 40x Optical Biopsy</div>
+            </div>
+          </button>
+        </div>
+
+        <!-- Custom Upload Dropzone -->
+        <div class="upload-box" id="uploadDropzone">
+          <input type="file" id="scanFileInput" accept="image/*,.dcm" class="file-input-hidden">
+          <div class="upload-box-content">
+            <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+            <span class="upload-title">Drop Custom Medical Scan</span>
+            <span class="upload-sub">Supports DICOM, PNG, JPG (CT/MRI/X-ray)</span>
+          </div>
+        </div>
+
+        <!-- Pre-Generated Test Images for Upload Testing -->
+        <div class="test-upload-gallery">
+          <div class="test-gallery-title"><i class="fa-solid fa-vial-circle-check text-cyan"></i> Quick Test Scans for Upload:</div>
+          <div class="test-chips-grid">
+            <button class="btn-test-chip" data-test-src="test_images/1_liver_ct_tumor.jpg" data-test-name="Liver CT (Hepatic Tumor)" data-test-modality="Abdominal CT" data-target-name="Hepatic Carcinoma Lesion" data-target-box="120,180,240,300" data-target-point="180,240">
+              <i class="fa-solid fa-file-medical text-amber"></i>
+              <span>1. Liver CT Tumor</span>
+            </button>
+            <button class="btn-test-chip" data-test-src="test_images/2_thyroid_ultrasound_nodule.jpg" data-test-name="Thyroid Ultrasound (Nodule)" data-test-modality="B-mode Ultrasound" data-target-name="Thyroid Hypoechoic Nodule" data-target-box="320,170,480,310" data-target-point="400,240">
+              <i class="fa-solid fa-wave-square text-cyan"></i>
+              <span>2. Thyroid Ultrasound</span>
+            </button>
+            <button class="btn-test-chip" data-test-src="test_images/3_cardiac_mri_ventricle.jpg" data-test-name="Cardiac Cine MRI (LV/RV)" data-test-modality="Cardiac MRI" data-target-name="Left Ventricle Cavity &amp; Myocardium" data-target-box="220,140,460,380" data-target-point="340,260">
+              <i class="fa-solid fa-heart-pulse text-crimson"></i>
+              <span>3. Cardiac Cine MRI</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Multi-slice 3D Z-Navigator -->
+      <section class="panel-section" id="sectionSliceNav">
+        <div class="section-header">
+          <h3><i class="fa-solid fa-layer-group"></i> Volumetric Z-Stack</h3>
+          <span class="badge badge-dim" id="sliceIndicator">Slice 18 / 32</span>
+        </div>
+        <div class="slice-slider-wrapper">
+          <button class="btn btn-icon-sm" id="btnPrevSlice" title="Previous Slice (A)"><i class="fa-solid fa-chevron-left"></i></button>
+          <input type="range" id="sliceRangeInput" min="1" max="32" value="18" class="custom-range" aria-label="Z-Stack Slice Range">
+          <button class="btn btn-icon-sm" id="btnNextSlice" title="Next Slice (D)"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+        <div class="slice-subtext">
+          <span>Axial Thickness: 1.25 mm</span>
+          <span id="sliceLocationZ">Z: -24.5 mm</span>
+        </div>
+      </section>
+
+      <!-- Radiology Window / Level & Colormap LUTs -->
+      <section class="panel-section">
+        <div class="section-header">
+          <h3><i class="fa-solid fa-sliders"></i> Radiology Window / LUT</h3>
+          <button class="btn-text-sm" id="btnResetLut">Reset</button>
+        </div>
+        
+        <!-- Preset Buttons -->
+        <div class="preset-buttons">
+          <button class="btn-chip active" data-preset="default">Default</button>
+          <button class="btn-chip" data-preset="brain">Brain</button>
+          <button class="btn-chip" data-preset="lung">Lung</button>
+          <button class="btn-chip" data-preset="bone">Bone</button>
+          <button class="btn-chip" data-preset="soft_tissue">Soft Tissue</button>
+        </div>
+
+        <div class="control-row">
+          <label for="windowLevelInput">Window Level (Center): <span id="wlValue">128</span></label>
+          <input type="range" id="windowLevelInput" min="0" max="255" value="128" class="custom-range">
+        </div>
+        <div class="control-row">
+          <label for="windowWidthInput">Window Width (Contrast): <span id="wwValue">256</span></label>
+          <input type="range" id="windowWidthInput" min="10" max="512" value="256" class="custom-range">
+        </div>
+
+        <!-- Colormap Select -->
+        <div class="control-row colormap-row">
+          <label for="colormapSelect"><i class="fa-solid fa-palette"></i> Colormap / Pseudo-Color</label>
+          <select id="colormapSelect" class="custom-select">
+            <option value="original">Natural / True Color (Fundus &amp; H&amp;E)</option>
+            <option value="grayscale" selected>Grayscale (Standard DICOM)</option>
+            <option value="jet">Jet / Rainbow Heatmap</option>
+            <option value="viridis">Viridis Spectral</option>
+            <option value="hot">Hot Iron</option>
+            <option value="bone">Bone High-Contrast</option>
+            <option value="pet">PET-CT Metabolic Fusion</option>
+          </select>
+        </div>
+      </section>
+
+    </aside>
+
+    <!-- Center Viewport Area -->
+    <section class="viewport-area" id="viewportArea">
+      
+      <!-- Top Viewport Prompt Tool Bar -->
+      <div class="prompt-toolbar" id="promptToolbar">
+        <div class="toolbar-group">
+          <span class="toolbar-title"><i class="fa-solid fa-wand-magic-sparkles"></i> MedSAM Prompt Mode:</span>
+          
+          <!-- Box Prompt -->
+          <button class="btn-tool active" id="toolBoxPrompt" data-tool="box" title="Bounding Box Prompt: Click &amp; drag box over target lesion">
+            <i class="fa-regular fa-square"></i>
+            <span>Box Prompt</span>
+            <kbd>B</kbd>
+          </button>
+
+          <!-- Positive Point Prompt -->
+          <button class="btn-tool" id="toolPointPos" data-tool="point_pos" title="Inclusion Point (+): Click inside target structure">
+            <i class="fa-solid fa-circle-plus text-emerald"></i>
+            <span>Inclusion (+)</span>
+            <kbd>P</kbd>
+          </button>
+
+          <!-- Negative Point Prompt -->
+          <button class="btn-tool" id="toolPointNeg" data-tool="point_neg" title="Exclusion Point (-): Click outside to exclude regions">
+            <i class="fa-solid fa-circle-minus text-crimson"></i>
+            <span>Exclusion (-)</span>
+            <kbd>N</kbd>
+          </button>
+
+          <!-- Scribble / Brush Prompt -->
+          <button class="btn-tool" id="toolBrushPrompt" data-tool="brush" title="Scribble Guidance: Draw rough stroke over target">
+            <i class="fa-solid fa-paintbrush"></i>
+            <span>Scribble Seed</span>
+            <kbd>S</kbd>
+          </button>
+        </div>
+
+        <div class="toolbar-divider"></div>
+
+        <!-- Semantic Text Prompt (Language-MedSAM) -->
+        <div class="text-prompt-wrap">
+          <div class="text-prompt-input-box">
+            <i class="fa-solid fa-comment-medical text-prompt-icon"></i>
+            <input type="text" id="textPromptInput" placeholder="Clinical text prompt (e.g. 'segment glioblastoma', 'optic cup')..." autocomplete="off">
+            <button class="btn-text-submit" id="btnSubmitTextPrompt" title="Execute Semantic Prompt">
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+          <!-- Quick Prompt Suggestions -->
+          <div class="quick-chips" id="quickPromptChips">
+            <button class="chip" data-query="target_primary">Target Lesion</button>
+            <button class="chip" data-query="core_substructure">Core Substructure</button>
+            <button class="chip" data-query="full_organ">Organ Boundary</button>
+          </div>
+        </div>
+
+        <div class="toolbar-spacer"></div>
+
+        <!-- Clear / Reset Tools -->
+        <div class="toolbar-group">
+          <button class="btn-tool-sm" id="btnUndoPrompt" title="Undo Last Prompt (Ctrl+Z)"><i class="fa-solid fa-rotate-left"></i></button>
+          <button class="btn-tool-sm" id="btnClearPrompts" title="Clear All Prompts"><i class="fa-solid fa-trash-can"></i></button>
+        </div>
+      </div>
+
+      <!-- Autonomous Pipeline Live Status & Explanation Banner -->
+      <div class="pipeline-status-banner" id="pipelineStatusBanner">
+        <div class="status-left">
+          <div class="pipeline-run-wrapper">
+            <button class="btn btn-run-pipeline" id="btnRunPipeline" title="Execute Autonomous End-to-End MedSAM Segmentation Pipeline">
+              <i class="fa-solid fa-play" id="runPipelineIcon"></i>
+              <span id="runPipelineBtnText">Auto-Run Pipeline</span>
+            </button>
+          </div>
+          <div class="status-divider-vertical"></div>
+          <div class="status-telemetry-block">
+            <div class="status-pulse-dot" id="pipelineStatusDot"></div>
+            <div class="status-text-stack">
+              <div class="status-stage-title" id="pipelineStageText">Pipeline Ready • Awaiting Run</div>
+              <div class="status-explanation" id="pipelineExplanationText">Click 'Auto-Run Pipeline' or upload a scan to autonomously evaluate all MedSAM processes.</div>
+            </div>
+          </div>
+        </div>
+        <div class="status-right">
+          <div class="status-progress-track">
+            <div class="status-progress-fill" id="pipelineProgressFill"></div>
+          </div>
+          <span class="status-percent" id="pipelinePercent">0%</span>
+        </div>
+      </div>
+
+      <!-- Main Canvas & Overlay Viewport Container -->
+      <div class="canvas-viewport" id="canvasViewport">
+        
+        <!-- Multi-layer Canvas Stack -->
+        <div class="canvas-wrapper" id="canvasWrapper">
+          <!-- Layer 1: Base Medical Scan Image -->
+          <canvas id="baseScanCanvas" width="600" height="600"></canvas>
+          <!-- Layer 2: Probability / Heatmap Logits Layer -->
+          <canvas id="heatmapCanvas" width="600" height="600"></canvas>
+          <!-- Layer 3: MedSAM Predicted Segmentation Mask & Neon Marching Ants -->
+          <canvas id="maskCanvas" width="600" height="600"></canvas>
+          <!-- Layer 4: Interactive Prompts Overlay (Boxes, Points, Handles) -->
+          <canvas id="promptOverlayCanvas" width="600" height="600"></canvas>
+          <!-- Layer 5: High-Tech Laser Scanline Sweep Layer -->
+          <div class="laser-scanner" id="laserScanner"></div>
+        </div>
+
+        <!-- Split-Screen Curtain Slider Divider (when Split View is active) -->
+        <div class="split-slider-curtain" id="splitCurtain" style="display: none;">
+          <div class="curtain-line"></div>
+          <div class="curtain-handle">
+            <i class="fa-solid fa-arrows-left-right"></i>
+          </div>
+        </div>
+
+        <!-- 3D Volumetric Surface Visualization Container (Toggled via 3D Mode) -->
+        <div class="surface-3d-view" id="surface3dView" style="display: none;">
+          <canvas id="surfaceCanvas" width="600" height="600"></canvas>
+          <div class="surface-overlay-badge">
+            <i class="fa-solid fa-cube"></i> Pseudo-3D Lesion Elevation Surface Map
+          </div>
+        </div>
+
+        <!-- Viewport Floating HUD Overlays -->
+        <div class="viewport-hud-top">
+          <div class="hud-pill" id="hudCoords"><i class="fa-solid fa-crosshairs"></i> X: <span id="hudX">0</span> Y: <span id="hudY">0</span> | HU: <span id="hudVal">0</span></div>
+          <div class="hud-pill hud-zoom-indicator"><span id="hudZoomText">100%</span></div>
+          <div class="hud-pill hud-active-lesion" id="hudLesionLabel"><i class="fa-solid fa-circle-dot"></i> Glioblastoma Multiforme (GBM)</div>
+        </div>
+
+        <!-- Magnifier Loupe (PIP Zoom on hover with Shift or toggle) -->
+        <div class="magnifier-lens" id="magnifierLens" style="display: none;">
+          <canvas id="magnifierCanvas" width="140" height="140"></canvas>
+          <div class="magnifier-crosshair"></div>
+          <div class="magnifier-badge">3x Zoom</div>
+        </div>
+
+        <!-- Viewport Notification / Laser Banner -->
+        <div class="inference-toast" id="inferenceToast">
+          <i class="fa-solid fa-bolt-lightning pulse-icon"></i>
+          <span id="inferenceToastText">MedSAM inference: Box prompt evaluated in 7.8ms</span>
+        </div>
+
+      </div>
+
+      <!-- Bottom Viewport Controls Bar -->
+      <div class="viewport-controls-bar">
+        <div class="controls-left">
+          <button class="btn-ctrl" id="btnZoomIn" title="Zoom In (+)"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+          <button class="btn-ctrl" id="btnZoomOut" title="Zoom Out (-)"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+          <button class="btn-ctrl" id="btnZoomFit" title="Reset Zoom &amp; Pan"><i class="fa-solid fa-expand"></i> Fit</button>
+          <button class="btn-ctrl" id="btnToggleMagnifier" title="Toggle Magnifier Lens (Shift)"><i class="fa-solid fa-search"></i> Loupe</button>
+          <div class="ctrl-sep"></div>
+          <button class="btn-ctrl" id="btnInvertColors" title="Invert Grayscale"><i class="fa-solid fa-circle-half-stroke"></i> Invert</button>
+        </div>
+
+        <div class="controls-center">
+          <!-- Toggle Mask Overlay -->
+          <label class="toggle-switch-wrap" title="Toggle Segmentation Mask Fill">
+            <input type="checkbox" id="chkShowMask" checked>
+            <span class="toggle-slider"></span>
+            <span class="toggle-text">Mask Fill</span>
+          </label>
+
+          <!-- Toggle Glowing Contour / Marching Ants -->
+          <label class="toggle-switch-wrap" title="Toggle Marching Ants / Neon Glowing Border">
+            <input type="checkbox" id="chkShowContour" checked>
+            <span class="toggle-slider"></span>
+            <span class="toggle-text">Contours</span>
+          </label>
+
+          <!-- Toggle Uncertainty / Confidence Heatmap -->
+          <label class="toggle-switch-wrap" title="Toggle MedSAM Model Confidence Logits Heatmap">
+            <input type="checkbox" id="chkShowUncertainty">
+            <span class="toggle-slider"></span>
+            <span class="toggle-text">Uncertainty</span>
+          </label>
+
+          <!-- Split-View Mode Toggle -->
+          <label class="toggle-switch-wrap" title="Curtain Split View: Compare Raw Scan vs MedSAM Mask">
+            <input type="checkbox" id="chkSplitView">
+            <span class="toggle-slider"></span>
+            <span class="toggle-text">Split View</span>
+          </label>
+
+          <!-- 3D Surface View Toggle -->
+          <label class="toggle-switch-wrap" title="View 3D Volumetric Elevation Map">
+            <input type="checkbox" id="chk3dSurface">
+            <span class="toggle-slider"></span>
+            <span class="toggle-text">3D Elevation</span>
+          </label>
+        </div>
+
+        <div class="controls-right">
+          <div class="opacity-slider-wrap" title="Mask Opacity">
+            <i class="fa-solid fa-circle-half-stroke"></i>
+            <input type="range" id="maskOpacityInput" min="0.1" max="1.0" step="0.05" value="0.55" class="custom-range-sm" aria-label="Mask Opacity">
+            <span id="maskOpacityValue">55%</span>
+          </div>
+          <!-- Color Picker for Mask -->
+          <div class="color-picker-wrap" title="Customize Mask Color">
+            <input type="color" id="maskColorPicker" value="#00f2fe" aria-label="Mask Color Picker">
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Right Panel: Quantitative Clinical Metrics & Diagnostics -->
+    <aside class="panel panel-right" id="panelRight">
+      
+      <!-- Real-time Clinical Quantitative Metrics -->
+      <section class="panel-section">
+        <div class="section-header">
+          <h2><i class="fa-solid fa-chart-pie"></i> Diagnostic Metrics</h2>
+          <span class="badge badge-success" id="validationBadge"><i class="fa-solid fa-check-double"></i> Ground Truth Sync</span>
+        </div>
+
+        <!-- Big Dual Radial Gauges (Dice & IoU) -->
+        <div class="metrics-gauge-grid">
+          
+          <!-- Dice Score Gauge -->
+          <div class="gauge-card">
+            <div class="gauge-circle-wrap">
+              <svg class="radial-gauge" viewBox="0 0 100 100">
+                <circle class="gauge-bg" cx="50" cy="50" r="42"></circle>
+                <circle class="gauge-progress gauge-cyan" id="gaugeDiceCircle" cx="50" cy="50" r="42" stroke-dasharray="264" stroke-dashoffset="20"></circle>
+              </svg>
+              <div class="gauge-inner">
+                <span class="gauge-val" id="metricDiceVal">94.8%</span>
+                <span class="gauge-lbl">DICE (DSC)</span>
+              </div>
+            </div>
+            <div class="gauge-footer">
+              <span class="gauge-grade grade-exceptional" id="diceGrade">Exceptional Match</span>
+            </div>
+          </div>
+
+          <!-- IoU (Jaccard) Gauge -->
+          <div class="gauge-card">
+            <div class="gauge-circle-wrap">
+              <svg class="radial-gauge" viewBox="0 0 100 100">
+                <circle class="gauge-bg" cx="50" cy="50" r="42"></circle>
+                <circle class="gauge-progress gauge-emerald" id="gaugeIouCircle" cx="50" cy="50" r="42" stroke-dasharray="264" stroke-dashoffset="35"></circle>
+              </svg>
+              <div class="gauge-inner">
+                <span class="gauge-val" id="metricIouVal">90.2%</span>
+                <span class="gauge-lbl">IoU (Jaccard)</span>
+              </div>
+            </div>
+            <div class="gauge-footer">
+              <span class="gauge-grade grade-high" id="iouGrade">High Overlap</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Telemetry Metrics List -->
+        <div class="metrics-data-table">
+          <div class="metric-row">
+            <div class="metric-key">
+              <i class="fa-solid fa-ruler-combined text-cyan"></i>
+              <span>95% Hausdorff Distance (HD95)</span>
+            </div>
+            <div class="metric-val" id="metricHd95">1.34 mm</div>
+          </div>
+
+          <div class="metric-row">
+            <div class="metric-key">
+              <i class="fa-solid fa-draw-polygon text-emerald"></i>
+              <span>Segmented Area</span>
+            </div>
+            <div class="metric-val" id="metricArea">1,842 mm²</div>
+          </div>
+
+          <div class="metric-row">
+            <div class="metric-key">
+              <i class="fa-solid fa-cube text-blue"></i>
+              <span>Est. Lesion Volume</span>
+            </div>
+            <div class="metric-val" id="metricVolume">14.6 cm³</div>
+          </div>
+
+          <div class="metric-row">
+            <div class="metric-key">
+              <i class="fa-solid fa-bullseye text-amber"></i>
+              <span>Mean Intensity / HU</span>
+            </div>
+            <div class="metric-val" id="metricMeanIntensity">+42.8 HU</div>
+          </div>
+
+          <div class="metric-row" id="metricSpecificRow">
+            <div class="metric-key">
+              <i class="fa-solid fa-circle-nodes text-purple"></i>
+              <span id="metricSpecificKey">Sphericity Index</span>
+            </div>
+            <div class="metric-val" id="metricSpecificVal">0.87 (High)</div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Active Prompts Register -->
+      <section class="panel-section">
+        <div class="section-header">
+          <h3><i class="fa-solid fa-list-check"></i> Active Prompts Log</h3>
+          <span class="badge badge-dim" id="promptCountBadge">1 Box • 2 Points</span>
+        </div>
+
+        <div class="prompts-list" id="promptsList">
+          <!-- Dynamic Prompt Chips injected here -->
+        </div>
+      </section>
+
+      <!-- Model Specs & Hardware Telemetry -->
+      <section class="panel-section">
+        <div class="section-header">
+          <h3><i class="fa-solid fa-microchip"></i> MedSAM Pipeline Specs</h3>
+          <span class="badge badge-ai">ViT-H Base</span>
+        </div>
+
+        <div class="pipeline-spec-grid">
+          <div class="spec-card">
+            <span class="spec-lbl">Vision Encoder</span>
+            <span class="spec-val">ViT-H (632M params)</span>
+          </div>
+          <div class="spec-card">
+            <span class="spec-lbl">Embedding Dim</span>
+            <span class="spec-val">256-D Feature Space</span>
+          </div>
+          <div class="spec-card">
+            <span class="spec-lbl">Prompt Latency</span>
+            <span class="spec-val text-emerald" id="specLatency">7.4 ms / prompt</span>
+          </div>
+          <div class="spec-card">
+            <span class="spec-lbl">Memory Cache</span>
+            <span class="spec-val">Cached (Zero re-encode)</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Actions & Export Suite -->
+      <section class="panel-section export-section">
+        <div class="section-header">
+          <h3><i class="fa-solid fa-file-export"></i> Export &amp; Interoperability</h3>
+        </div>
+
+        <div class="export-btn-grid">
+          <button class="btn btn-secondary" id="btnExportMask" title="Export Binary Mask PNG">
+            <i class="fa-regular fa-image"></i> Mask PNG
+          </button>
+          <button class="btn btn-secondary" id="btnExportOverlay" title="Export Annotated Medical Composite">
+            <i class="fa-solid fa-file-image"></i> Overlay Scan
+          </button>
+          <button class="btn btn-secondary" id="btnExportJson" title="Export COCO / DICOM JSON Annotations">
+            <i class="fa-solid fa-code"></i> JSON Coords
+          </button>
+          <button class="btn btn-secondary" id="btnExportSvg" title="Export Scalable Vector Contour">
+            <i class="fa-solid fa-vector-square"></i> Vector SVG
+          </button>
+        </div>
+      </section>
+
+    </aside>
+
+  </main>
+
+  <!-- MODAL 1: Clinical Radiologist Diagnostic Report Modal -->
+  <div class="modal-backdrop" id="reportModal" style="display: none;">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-header">
+        <div class="modal-header-title">
+          <i class="fa-solid fa-file-medical-alt text-cyan"></i>
+          <div>
+            <h3>Clinical AI Radiology Segmentation Report</h3>
+            <p>Generated by MedSAM Studio Clinical Decision Support Suite</p>
+          </div>
+        </div>
+        <button class="btn-close-modal" id="btnCloseReportModal" aria-label="Close Report Modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="modal-body" id="printableReportBody">
+        <!-- Hospital Header -->
+        <div class="report-brand-header">
+          <div>
+            <h2 class="report-institution">METROPOLITAN UNIVERSITY HOSPITAL</h2>
+            <p class="report-dept">Department of Diagnostic Radiology &amp; Precision Oncology</p>
+          </div>
+          <div class="report-meta-box">
+            <div><strong>Report ID:</strong> <span id="repReportId">MEDSAM-2026-9481</span></div>
+            <div><strong>Timestamp:</strong> <span id="repTimestamp">2026-10-28 20:54 UTC</span></div>
+          </div>
+        </div>
+
+        <hr class="report-divider">
+
+        <!-- Patient & Scan Demographics -->
+        <div class="report-grid-3">
+          <div class="rep-card">
+            <div class="rep-card-title">Patient Demographics</div>
+            <div><strong>ID:</strong> <span id="repPatientId">PT-894102</span></div>
+            <div><strong>Age/Sex:</strong> 58 Y / Male</div>
+            <div><strong>Study:</strong> High-Resolution Diagnostic Imaging</div>
+          </div>
+          <div class="rep-card">
+            <div class="rep-card-title">Imaging Study Protocol</div>
+            <div><strong>Modality:</strong> <span id="repModality">MRI T1c (Axial)</span></div>
+            <div><strong>Slice Thickness:</strong> 1.0 mm isotropic</div>
+            <div><strong>Scanner:</strong> 3.0T Clinical Diagnostic Unit</div>
+          </div>
+          <div class="rep-card">
+            <div class="rep-card-title">AI Foundation Model</div>
+            <div><strong>Architecture:</strong> MedSAM (Meta SAM ViT-H)</div>
+            <div><strong>Weights:</strong> MedSAM-FineTuned-Universal</div>
+            <div><strong>Validation:</strong> Ground Truth Co-registered</div>
+          </div>
+        </div>
+
+        <!-- Scan & Mask Visual Comparison in Report -->
+        <div class="report-imaging-figures">
+          <div class="figure-box">
+            <img id="repScanImage" src="assets/images/brain_mri.jpg" alt="Diagnostic Raw Medical Scan">
+            <span class="figure-caption">Fig 1. Original Diagnostic Scan</span>
+          </div>
+          <div class="figure-box">
+            <img id="repOverlayImage" src="" alt="MedSAM Prompt-Based Mask Overlay">
+            <span class="figure-caption">Fig 2. MedSAM Prompt-Guided Segmentation</span>
+          </div>
+        </div>
+
+        <!-- Quantitative Diagnostic Findings Table -->
+        <div class="rep-card-title mt-4">Quantitative Radiomic Metrics &amp; Boundary Precision</div>
+        <table class="report-table">
+          <thead>
+            <tr>
+              <th>Radiomic Metric</th>
+              <th>MedSAM Output</th>
+              <th>Ground Truth Reference</th>
+              <th>Clinical Concordance</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Dice Similarity (DSC)</strong></td>
+              <td class="text-emerald" id="repDice">94.8%</td>
+              <td>100.0%</td>
+              <td><span class="badge badge-success">Concordant</span></td>
+            </tr>
+            <tr>
+              <td><strong>Intersection over Union (IoU)</strong></td>
+              <td id="repIou">90.2%</td>
+              <td>100.0%</td>
+              <td><span class="badge badge-success">High Overlap</span></td>
+            </tr>
+            <tr>
+              <td><strong>95% Hausdorff Distance</strong></td>
+              <td id="repHd95">1.34 mm</td>
+              <td>&lt; 2.5 mm Tolerance</td>
+              <td><span class="badge badge-success">Sub-voxel Precision</span></td>
+            </tr>
+            <tr>
+              <td><strong>Segmented Cross-Section Area</strong></td>
+              <td id="repArea">1,842 mm²</td>
+              <td>1,860 mm²</td>
+              <td>99.0% Volumetric Match</td>
+            </tr>
+            <tr>
+              <td><strong>Mean Attenuation / Intensity</strong></td>
+              <td id="repIntensity">+42.8 HU</td>
+              <td>Diagnostic Baseline</td>
+              <td>Consistent with Target Lesion</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Radiologist Impression / Conclusion -->
+        <div class="report-impression-box">
+          <h4>CLINICAL RADIOLOGIST IMPRESSION:</h4>
+          <p id="repImpressionText">
+            Successful prompt-based zero-shot / fine-tuned segmentation of the focal glioblastoma multiforme lesion in the right cerebral hemisphere using MedSAM. Segmented contour demonstrates exceptional border adherence with high Dice coefficient (0.948) and sub-voxel boundary error (1.34 mm HD95). No critical necrotic leakage observed. Recommended for stereotactic radiotherapy target volume definition.
+          </p>
+        </div>
+
+        <div class="report-signatures">
+          <div>
+            <div class="sig-line"></div>
+            <span>Attending Diagnostic Radiologist, MD, FACR</span>
+          </div>
+          <div>
+            <div class="sig-line"></div>
+            <span>Clinical AI Medical Physics Lead, Ph.D</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="btnPrintReport"><i class="fa-solid fa-print"></i> Print / Save as PDF</button>
+        <button class="btn btn-primary" id="btnDownloadReportHtml"><i class="fa-solid fa-download"></i> Save Report</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: MedSAM Architecture & Workflow Modal -->
+  <!-- MODAL 3: User Manual & Interactive Project Guide Modal -->
+  <div class="modal-backdrop" id="userManualModal" style="display: none;">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-header">
+        <div class="modal-header-title">
+          <i class="fa-solid fa-book-medical text-cyan"></i>
+          <div>
+            <h3>MedSAM Studio — Clinical User Manual &amp; Project Guide</h3>
+            <p>Comprehensive Documentation, Architecture Overview &amp; Interactive Cheatsheet</p>
+          </div>
+        </div>
+        <button class="btn-close-modal" id="btnCloseManualModal" aria-label="Close User Manual"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="manual-nav-bar">
+        <button class="manual-tab-btn active" data-tab="tabOverview">
+          <i class="fa-solid fa-circle-info"></i> 1. Overview &amp; What It Does
+        </button>
+        <button class="manual-tab-btn" data-tab="tabPrompting">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> 2. How to Prompt
+        </button>
+        <button class="manual-tab-btn" data-tab="tabModalities">
+          <i class="fa-solid fa-images"></i> 3. Clinical Modalities
+        </button>
+        <button class="manual-tab-btn" data-tab="tabRadiomics">
+          <i class="fa-solid fa-chart-pie"></i> 4. Radiomics &amp; Metrics
+        </button>
+        <button class="manual-tab-btn" data-tab="tabTools">
+          <i class="fa-solid fa-sliders"></i> 5. Radiology Tools
+        </button>
+        <button class="manual-tab-btn" data-tab="tabShortcuts">
+          <i class="fa-solid fa-keyboard"></i> 6. Shortcuts Matrix
+        </button>
+      </div>
+
+      <div class="modal-body manual-modal-body">
+        
+        <!-- TAB 1: Overview & What the Project Does -->
+        <div class="manual-tab-pane active" id="tabOverview">
+          <div class="manual-hero-banner">
+            <div class="hero-badge"><i class="fa-solid fa-dna"></i> Foundational Medical AI Architecture</div>
+            <h3>What is MedSAM Studio?</h3>
+            <p>
+              <strong>MedSAM (Segment Anything in Medical Images)</strong> is a breakthrough medical foundation model developed by adapting Meta’s Segment Anything Model (SAM) with deep fine-tuning on over <strong>1.5 million medical image-mask pairs</strong> across 10 imaging modalities.
+            </p>
+          </div>
+
+          <div class="manual-grid-2">
+            <div class="manual-card">
+              <div class="card-icon-title">
+                <i class="fa-solid fa-triangle-exclamation text-amber"></i>
+                <h4>The Problem with Traditional Medical AI</h4>
+              </div>
+              <p>
+                Legacy segmentation architectures (such as standard U-Net, V-Net, and nnU-Net) are <em>static and task-specific</em>. They must be re-trained from scratch for every new anatomical organ or tumor type, and they output non-editable, black-box predictions that radiologists cannot easily steer or adjust.
+              </p>
+            </div>
+
+            <div class="manual-card">
+              <div class="card-icon-title">
+                <i class="fa-solid fa-wand-magic-sparkles text-emerald"></i>
+                <h4>The MedSAM Prompt-Driven Solution</h4>
+              </div>
+              <p>
+                MedSAM introduces <strong>zero-shot and prompt-conditioned segmentation</strong>. By feeding simple visual prompts (bounding boxes, point clicks, text, or scribbles), clinicians can segment *any* anatomical structure or pathological lesion in real-time with sub-millimeter precision.
+              </p>
+            </div>
+          </div>
+
+          <div class="manual-card">
+            <h4>Key Capabilities of this Suite:</h4>
+            <div class="features-checklist">
+              <div class="check-item"><i class="fa-solid fa-circle-check text-cyan"></i> <strong>Multi-Modal Universal Segmentation:</strong> CT, MRI, Retinal Fundus, Histopathology, and custom scan upload.</div>
+              <div class="check-item"><i class="fa-solid fa-circle-check text-cyan"></i> <strong>Real-Time Sub-10ms Inference:</strong> Heavy ViT-H embeddings precomputed and cached for zero-latency prompt updates.</div>
+              <div class="check-item"><i class="fa-solid fa-circle-check text-cyan"></i> <strong>Quantitative Diagnostic Radiomics:</strong> Real-time Dice (DSC), IoU, HD95 boundary error, area, volume, and HU attenuation.</div>
+              <div class="check-item"><i class="fa-solid fa-circle-check text-cyan"></i> <strong>Clinical Interoperability:</strong> One-click export to DICOM-RT JSON, binary masks, SVG contours, and official printable PDF radiology reports.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: How to Prompt the Model -->
+        <div class="manual-tab-pane" id="tabPrompting">
+          <div class="tab-intro">
+            <h3>Interactive Prompt Guidance — Step-by-Step Cheatsheet</h3>
+            <p>MedSAM supports four complementary prompting modalities. You can combine them for complex anatomical delineations:</p>
+          </div>
+
+          <div class="prompt-guide-grid">
+            
+            <!-- Box Prompting -->
+            <div class="guide-box">
+              <div class="guide-box-header">
+                <span class="badge badge-ai">Primary Mode</span>
+                <h4><i class="fa-regular fa-square text-cyan"></i> Bounding Box Prompt (<kbd>B</kbd>)</h4>
+              </div>
+              <ol class="guide-steps">
+                <li>Select the <strong>Box Prompt</strong> tool from the top toolbar or press <kbd>B</kbd>.</li>
+                <li>Click &amp; drag a box enclosing the target organ or lesion on the canvas.</li>
+                <li>MedSAM immediately isolates the target structure, snapping to high-contrast anatomical edges.</li>
+                <li>Drag any of the 4 corner handles to tighten or expand the region of interest.</li>
+              </ol>
+              <div class="guide-tip"><i class="fa-solid fa-lightbulb text-amber"></i> <strong>Tip:</strong> Loose boxes with 5–10% margin work best; MedSAM’s attention mechanism autonomously finds the inner boundary.</div>
+            </div>
+
+            <!-- Point Prompting -->
+            <div class="guide-box">
+              <div class="guide-box-header">
+                <span class="badge badge-success">Refinement</span>
+                <h4><i class="fa-solid fa-circle-plus text-emerald"></i> Point Seeds (<kbd>P</kbd> &amp; <kbd>N</kbd>)</h4>
+              </div>
+              <ol class="guide-steps">
+                <li><strong>Inclusion Points (<kbd>P</kbd>):</strong> Click inside under-segmented or low-contrast tumor areas to guide the mask into those regions.</li>
+                <li><strong>Exclusion Points (<kbd>N</kbd>):</strong> Click on surrounding healthy parenchyma, necrotic centers, or bones to carve them out of the mask.</li>
+                <li>Add multiple positive and negative points to sculpt delicate, convoluted boundaries.</li>
+              </ol>
+              <div class="guide-tip"><i class="fa-solid fa-lightbulb text-amber"></i> <strong>Tip:</strong> Combining 1 box prompt with 1–2 point seeds achieves clinical agreement exceeding 95% DSC.</div>
+            </div>
+
+            <!-- Language Guidance -->
+            <div class="guide-box">
+              <div class="guide-box-header">
+                <span class="badge badge-ai">Semantic NLP</span>
+                <h4><i class="fa-solid fa-comment-medical text-blue"></i> Semantic Text Prompt</h4>
+              </div>
+              <ol class="guide-steps">
+                <li>Type an anatomical query into the top search bar (e.g. <code>"glioblastoma"</code>, <code>"lung nodule"</code>, <code>"optic cup"</code>).</li>
+                <li>Press <kbd>Enter</kbd> or click one of the quick chips.</li>
+                <li>MedSAM maps the natural language text prompt to learned spatial anatomical priors and triggers immediate segmentation.</li>
+              </ol>
+            </div>
+
+            <!-- Scribble Guidance -->
+            <div class="guide-box">
+              <div class="guide-box-header">
+                <span class="badge badge-dim">Freehand</span>
+                <h4><i class="fa-solid fa-paintbrush text-amber"></i> Scribble Guidance (<kbd>S</kbd>)</h4>
+              </div>
+              <ol class="guide-steps">
+                <li>Select the <strong>Scribble Seed</strong> tool or press <kbd>S</kbd>.</li>
+                <li>Draw a quick rough stroke across the structure of interest.</li>
+                <li>MedSAM converts your brush stroke into guidance seeds and snaps the mask to the full organ perimeter.</li>
+              </ol>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- TAB 3: Clinical Modalities -->
+        <div class="manual-tab-pane" id="tabModalities">
+          <div class="tab-intro">
+            <h3>Preloaded Diagnostic Datasets &amp; Custom Scan Upload</h3>
+            <p>Explore the four clinical imaging modalities or drag and drop your own scan:</p>
+          </div>
+
+          <div class="modalities-cards-row">
+            
+            <div class="m-card">
+              <div class="m-card-badge tag-mri">MRI T1-Gd</div>
+              <h4>Brain MRI (Axial)</h4>
+              <p><strong>Clinical Target:</strong> Glioblastoma Multiforme (GBM) ring-enhancing lesion in the right cerebral hemisphere.</p>
+              <div class="m-meta">512x512 • 1.0mm isotropic • Soft tissue window</div>
+            </div>
+
+            <div class="m-card">
+              <div class="m-card-badge tag-ct">CT Lung Window</div>
+              <h4>Chest CT (Axial)</h4>
+              <p><strong>Clinical Target:</strong> Solitary Pulmonary Nodule (SPN) in the anterior segment of the upper right lung lobe.</p>
+              <div class="m-meta">512x512 • 0.72mm • Hounsfield attenuation -140 HU</div>
+            </div>
+
+            <div class="m-card">
+              <div class="m-card-badge tag-fundus">Ophthalmology</div>
+              <h4>Retinal Fundus Photography</h4>
+              <p><strong>Clinical Target:</strong> Optic Cup &amp; Optic Disc. Calculates physiological <strong>Cup-to-Disc Ratio (CDR = 0.58)</strong> for Glaucoma screening.</p>
+              <div class="m-meta">True Color • 45° Field of View</div>
+            </div>
+
+            <div class="m-card">
+              <div class="m-card-badge tag-pathology">Biopsy Slide</div>
+              <h4>Histopathology (H&amp;E 40x)</h4>
+              <p><strong>Clinical Target:</strong> Infiltrating Ductal Carcinoma pleomorphic cell nuclei nested within fibrous connective stroma.</p>
+              <div class="m-meta">Natural H&amp;E stain • 0.5 µm/pixel resolution</div>
+            </div>
+
+          </div>
+
+          <div class="manual-card mt-3">
+            <div class="card-icon-title">
+              <i class="fa-solid fa-cloud-arrow-up text-cyan"></i>
+              <h4>Testing Your Own Medical Images</h4>
+            </div>
+            <p>
+              Simply drag and drop any DICOM, PNG, or JPG scan into the <strong>Drop Custom Medical Scan</strong> box in the left sidebar. The system automatically computes Sobel gradient fields, activates the interactive prompt tools, and allows full segmentation on your own files!
+            </p>
+          </div>
+        </div>
+
+        <!-- TAB 4: Understanding Diagnostic Radiomics -->
+        <div class="manual-tab-pane" id="tabRadiomics">
+          <div class="tab-intro">
+            <h3>Quantitative Radiomics &amp; Model Accuracy Metrics</h3>
+            <p>Every prompt change automatically computes real-time quantitative validation against clinical ground truth:</p>
+          </div>
+
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Diagnostic Metric</th>
+                <th>Mathematical Formula</th>
+                <th>Clinical Interpretation</th>
+                <th>Benchmark Level</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Dice Similarity (DSC)</strong></td>
+                <td><code>2 × |A ∩ B| / (|A| + |B|)</code></td>
+                <td>Volumetric overlap between predicted mask and ground truth. Standard gold standard for radiology AI validation.</td>
+                <td><span class="badge badge-success">&gt; 90% (Concordant)</span></td>
+              </tr>
+              <tr>
+                <td><strong>Intersection over Union (IoU)</strong></td>
+                <td><code>|A ∩ B| / (|A ∪ B|)</code></td>
+                <td>Jaccard index quantifying pure spatial intersection area over total combined area.</td>
+                <td><span class="badge badge-success">&gt; 85% (High Overlap)</span></td>
+              </tr>
+              <tr>
+                <td><strong>95% Hausdorff Distance</strong></td>
+                <td><code>HD95 = 95th percentile dist(∂A, ∂B)</code></td>
+                <td>Maximum boundary error in physical millimeters. Measures how close the contour border is to true tumor margin.</td>
+                <td><span class="badge badge-success">&lt; 2.0 mm (Sub-voxel)</span></td>
+              </tr>
+              <tr>
+                <td><strong>Physical Area &amp; Volume</strong></td>
+                <td><code>Pixels × Spacing² (mm²)</code></td>
+                <td>True anatomical cross-sectional lesion area and estimated 3D tumor volume in cm³ (used for TNM staging).</td>
+                <td>Exact Geometry</td>
+              </tr>
+              <tr>
+                <td><strong>Mean Attenuation (HU)</strong></td>
+                <td><code>Σ HU(x,y) / Area</code></td>
+                <td>Average CT Hounsfield Units or MRI signal intensity within the contour (differentiates fluid, fat, and solid tumor).</td>
+                <td>Radiology HU Scale</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- TAB 5: Radiology Tools & Visual Effects -->
+        <div class="manual-tab-pane" id="tabTools">
+          <div class="tab-intro">
+            <h3>Radiology Workstation Controls &amp; Visual Tools</h3>
+            <p>Take advantage of advanced diagnostic visualization features:</p>
+          </div>
+
+          <div class="manual-grid-2">
+            <div class="manual-card">
+              <h4><i class="fa-solid fa-arrows-left-right text-cyan"></i> Split-Screen Curtain View</h4>
+              <p>Turn on <strong>Split View</strong> at the bottom. A glowing cyan vertical divider appears. Drag it horizontally across the image to inspect the exact anatomical tissue before vs after segmentation.</p>
+            </div>
+
+            <div class="manual-card">
+              <h4><i class="fa-solid fa-cube text-emerald"></i> Pseudo-3D Volumetric Elevation Map</h4>
+              <p>Turn on <strong>3D Elevation</strong> at the bottom to project an isometric wireframe surface plot displaying the lesion's 3D density heightfield and contour peaks.</p>
+            </div>
+
+            <div class="manual-card">
+              <h4><i class="fa-solid fa-search text-blue"></i> Magnifier Loupe (PIP Zoom)</h4>
+              <p>Hold the <kbd>Shift</kbd> key or click <strong>Loupe</strong> to activate a 3x optical inspection lens following your mouse cursor with crosshair coordinates.</p>
+            </div>
+
+            <div class="manual-card">
+              <h4><i class="fa-solid fa-file-medical text-purple"></i> Official Clinical Radiology Report</h4>
+              <p>Click <strong>Clinical Report</strong> in the top-right header to view and print an official diagnostic report complete with patient demographics, figures, metrics, radiologist impressions, and PDF export.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 6: Complete Keyboard Shortcuts Matrix -->
+        <div class="manual-tab-pane" id="tabShortcuts">
+          <div class="tab-intro">
+            <h3>Complete Keyboard Shortcuts Matrix</h3>
+            <p>Operate MedSAM Studio with rapid single-key clinical efficiency:</p>
+          </div>
+
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>Key / Shortcut</th>
+                <th>Tool Name</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><kbd>B</kbd></td>
+                <td><strong>Box Prompt Mode</strong></td>
+                <td>Activate interactive bounding box drag tool</td>
+              </tr>
+              <tr>
+                <td><kbd>P</kbd></td>
+                <td><strong>Inclusion Seed (+)</strong></td>
+                <td>Place emerald positive inclusion point</td>
+              </tr>
+              <tr>
+                <td><kbd>N</kbd></td>
+                <td><strong>Exclusion Seed (-)</strong></td>
+                <td>Place crimson negative exclusion point</td>
+              </tr>
+              <tr>
+                <td><kbd>S</kbd></td>
+                <td><strong>Scribble Brush</strong></td>
+                <td>Activate freehand guidance stroke brush</td>
+              </tr>
+              <tr>
+                <td><kbd>M</kbd></td>
+                <td><strong>Toggle Mask Fill</strong></td>
+                <td>Turn semi-transparent color mask overlay on or off</td>
+              </tr>
+              <tr>
+                <td><kbd>C</kbd></td>
+                <td><strong>Toggle Contours</strong></td>
+                <td>Turn animated glowing marching ants border on or off</td>
+              </tr>
+              <tr>
+                <td><kbd>Ctrl</kbd> + <kbd>Z</kbd></td>
+                <td><strong>Undo Prompt</strong></td>
+                <td>Revert last prompt modification</td>
+              </tr>
+              <tr>
+                <td><kbd>Shift</kbd> <em>(Hold)</em></td>
+                <td><strong>Magnifier Loupe</strong></td>
+                <td>Inspect pixels under 3x optical zoom PIP lens</td>
+              </tr>
+              <tr>
+                <td><kbd>+</kbd> / <kbd>-</kbd></td>
+                <td><strong>Zoom In / Out</strong></td>
+                <td>Scale the active medical scan viewport</td>
+              </tr>
+              <tr>
+                <td><kbd>Esc</kbd></td>
+                <td><strong>Close Modals</strong></td>
+                <td>Dismiss any open dialog or report</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btnTrySampleTour"><i class="fa-solid fa-play"></i> Try Brain MRI Sample</button>
+        <button class="btn btn-primary" id="btnAckManualModal">Start Using Workstation</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="archModal" style="display: none;">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-header">
+        <div class="modal-header-title">
+          <i class="fa-solid fa-network-wired text-cyan"></i>
+          <div>
+            <h3>MedSAM Architecture &amp; Prompt Pipeline</h3>
+            <p>How the Foundation Segment Anything Model is Adapted for Medical Diagnostics</p>
+          </div>
+        </div>
+        <button class="btn-close-modal" id="btnCloseArchModal" aria-label="Close Architecture Modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="modal-body">
+        
+        <!-- Interactive Architecture Diagram -->
+        <div class="arch-flow-container">
+          
+          <div class="arch-stage stage-image">
+            <div class="stage-icon"><i class="fa-solid fa-file-medical"></i></div>
+            <div class="stage-title">Medical Image Input</div>
+            <div class="stage-sub">CT / MRI / Fundus / Path</div>
+            <div class="stage-dim">1024 x 1024 x 3</div>
+          </div>
+
+          <div class="arch-arrow">
+            <i class="fa-solid fa-arrow-right"></i>
+            <span>Patch Embed</span>
+          </div>
+
+          <div class="arch-stage stage-encoder">
+            <div class="stage-icon"><i class="fa-solid fa-brain"></i></div>
+            <div class="stage-title">ViT-H Heavy Image Encoder</div>
+            <div class="stage-sub">Vision Transformer (14x14 windowed attention)</div>
+            <div class="stage-badge">Computed Once (Cached)</div>
+            <div class="stage-dim">64 x 64 x 256 Features</div>
+          </div>
+
+          <div class="arch-arrow">
+            <i class="fa-solid fa-arrow-right"></i>
+            <span>Image Embeddings</span>
+          </div>
+
+          <div class="arch-stage stage-decoder">
+            <div class="stage-icon"><i class="fa-solid fa-bolt"></i></div>
+            <div class="stage-title">Prompt-Guided Mask Decoder</div>
+            <div class="stage-sub">2-Way Cross-Attention &amp; MLP</div>
+            <div class="stage-badge badge-fast">Sub-10ms Inference</div>
+            <div class="stage-dim">Multi-scale Logits</div>
+          </div>
+
+          <div class="arch-arrow">
+            <i class="fa-solid fa-arrow-right"></i>
+            <span>Sigmoid / OTSU</span>
+          </div>
+
+          <div class="arch-stage stage-output">
+            <div class="stage-icon"><i class="fa-solid fa-mask"></i></div>
+            <div class="stage-title">Segmented Mask &amp; Contours</div>
+            <div class="stage-sub">Precise Anatomic Boundaries</div>
+            <div class="stage-dim">Binary + IoU Confidence</div>
+          </div>
+
+        </div>
+
+        <!-- Prompt Conditioning Branch -->
+        <div class="arch-prompt-branch">
+          <div class="prompt-branch-title"><i class="fa-solid fa-sliders"></i> Prompt Encoder Module (Sparse &amp; Dense Positional Encodings):</div>
+          <div class="prompt-cards-row">
+            <div class="arch-p-card">
+              <i class="fa-regular fa-square text-cyan"></i>
+              <strong>Bounding Boxes</strong>
+              <span>Top-left &amp; bottom-right positional Fourier tokens</span>
+            </div>
+            <div class="arch-p-card">
+              <i class="fa-solid fa-circle-plus text-emerald"></i>
+              <strong>Point Seeds (+ / -)</strong>
+              <span>Gaussian positional embeddings + foreground/background learned labels</span>
+            </div>
+            <div class="arch-p-card">
+              <i class="fa-solid fa-comment-medical text-blue"></i>
+              <strong>Language Guidance</strong>
+              <span>Clinical text query mapped to anatomical prior coordinates</span>
+            </div>
+            <div class="arch-p-card">
+              <i class="fa-solid fa-paintbrush text-amber"></i>
+              <strong>Scribble Guidance</strong>
+              <span>Sparse brush strokes integrated as dense guidance masks</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="arch-explanation-text">
+          <h4>Why MedSAM Outperforms Generic Foundation Models in Medicine:</h4>
+          <ul>
+            <li><strong>Medical Fine-Tuning:</strong> Standard SAM is trained on natural photographs (SA-1B), where edges are sharp and contrast is uniform. MedSAM was fine-tuned on over 1.5 million medical image-mask pairs across 10 imaging modalities, understanding subtle low-contrast boundaries in CT, MRI, and ultrasound.</li>
+            <li><strong>Instant Interactive Latency:</strong> The heavy Vision Transformer (ViT-H) image encoder runs once per slice, producing a 256-dimensional spatial embedding tensor. The prompt decoder is lightweight (&lt; 4MB) and executes in <strong>under 10 milliseconds</strong>, allowing real-time interactive box dragging and point morphing.</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-primary" id="btnAckArchModal">Got It</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/audio.js?v=2.4"></script>
+  <script src="js/groundtruth.js?v=2.4"></script>
+  <script src="js/segmentation.js?v=2.4"></script>
+  <script src="js/renderer.js?v=2.4"></script>
+  <script src="js/report.js?v=2.4"></script>
+  <script src="app.js?v=2.4"></script>
+</body>
+</html>
